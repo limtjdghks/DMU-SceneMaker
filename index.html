@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>임성환 | 프론트엔드 포트폴리오</title>
+    <!-- Chosen Palette: Calm Harmony (Light Gray / Indigo / Slate) -->
+    <!-- Application Structure Plan: A single-page scrolling portfolio website. The structure follows the markdown: Hero, About, Skills, and a detailed Project section. A sticky navigation bar with smooth-scrolling links allows easy navigation. The primary interaction is a tabbed interface for the 'Scene#Maker' project. This was chosen because the project has many distinct parts (Functions, Role, Results, Retrospective). Tabs allow the user to explore this dense information in manageable, self-selected chunks, which is far more user-friendly and less overwhelming than a single, long wall of text. -->
+    <!-- Visualization & Content Choices:
+        1. Skills List -> Goal: Inform -> Viz: Styled HTML tags (pills) -> Interaction: Hover effect -> Justification: Modern, visually scannable way to present skills. (HTML/Tailwind)
+        2. Project Details -> Goal: Organize/Inform -> Viz: Tabbed Interface -> Interaction: JavaScript click events to show/hide content panels -> Justification: Best method to organize dense, multi-faceted information cleanly. (HTML/Tailwind/JS)
+        3. Code Snippet -> Goal: Inform -> Viz: Styled <pre><code> block -> Interaction: Horizontal scroll -> Justification: Standard and readable way to display code. (HTML/Tailwind)
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --indigo-50: #eef2ff;
+            --indigo-100: #e0e7ff;
+            --indigo-200: #c7d2fe;
+            --indigo-300: #a5b4fc;
+            --indigo-400: #818cf8;
+            --indigo-600: #4f46e5;
+            --indigo-700: #4338ca;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --green-600: #16a34a;
+            --blue-600: #2563eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            background-color: var(--slate-50);
+            color: var(--slate-700);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 텍스트 선택 스타일 */
+        ::selection {
+            background-color: var(--indigo-200);
+            color: var(--slate-900);
+        }
+
+        ::-moz-selection {
+            background-color: var(--indigo-200);
+            color: var(--slate-900);
+        }
+
+        /* 포커스 링 스타일 */
+        *:focus-visible {
+            outline: 2px solid var(--indigo-600);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        /* 섹션 페이드인 애니메이션 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        section {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* 메인 네비게이션 개선 */
+        body > nav {
+            transition: all 0.3s ease;
+        }
+
+        body > nav .ml-10 a {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        body > nav .ml-10 a::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: var(--indigo-600);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            border-radius: 1px;
+        }
+
+        body > nav .ml-10 a:hover::after {
+            width: 60%;
+        }
+
+        body > nav .ml-10 a:hover {
+            color: var(--indigo-600);
+        }
+
+        /* Hero 섹션 애니메이션 */
+        header h1 {
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        header p {
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        header .flex {
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        /* 버튼 개선 */
+        a[class*="inline-flex"] {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        a[class*="inline-flex"]::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        a[class*="inline-flex"]:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        a[class*="inline-flex"]:active {
+            transform: scale(0.98);
+        }
+
+        /* 탭 인터페이스 개선 */
+        .tab-btn {
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            background: transparent;
+        }
+
+        .tab-btn:hover {
+            background-color: var(--slate-100);
+            color: var(--slate-900);
+        }
+
+        .tab-btn.active {
+            color: var(--indigo-600);
+            border-bottom-color: var(--indigo-600);
+            background-color: transparent;
+        }
+
+        .tab-btn.active::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--indigo-600), transparent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 코드 블록 개선 */
+        pre {
+            position: relative;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.4),
+                        0 4px 8px -2px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        pre::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        pre code {
+            display: block;
+            color: #e2e8f0;
+            font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+            line-height: 1.8;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 코드 블록 내부 주석 스타일 (시뮬레이션) */
+        pre code {
+            white-space: pre;
+            word-wrap: normal;
+            overflow-x: auto;
+        }
+
+        /* 프로젝트 카드 개선 */
+        .max-w-5xl.rounded-xl {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .max-w-5xl.rounded-xl:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* 섹션 제목 개선 */
+        section h2 {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        section .inline-flex {
+            justify-content: center;
+        }
+
+        section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--indigo-600), var(--indigo-400), transparent);
+            border-radius: 2px;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+        }
+
+        /* 링크 개선 */
+        a[href^="http"] {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        a[href^="http"]:hover {
+            padding-right: 8px;
+        }
+
+        a[href^="http"]::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        a[href^="http"]:hover::after {
+            right: -12px;
+            opacity: 1;
+        }
+
+        /* 리스트 스타일 개선 */
+        ul li {
+            position: relative;
+            padding-left: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        ul li:hover {
+            padding-left: 1rem;
+            color: var(--indigo-600);
+        }
+
+        ul li::marker {
+            color: var(--indigo-600);
+        }
+
+        /* Footer 개선 */
+        footer {
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        /* 반응형 개선 */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+
+            header p {
+                font-size: 1.125rem;
+            }
+
+            section {
+                padding: 3rem 0;
+            }
+
+            section h2 {
+                font-size: 1.875rem;
+            }
+
+            section h2::after {
+                width: 60px;
+                height: 3px;
+            }
+
+            .tab-btn {
+                font-size: 0.875rem;
+                padding: 0.75rem 0.5rem;
+            }
+
+            .skill-tag {
+                font-size: 0.8125rem;
+                padding: 6px 12px;
+            }
+
+            pre {
+                font-size: 0.8125rem;
+                padding: 0.75rem;
+            }
+
+            body > nav .ml-10 a::after {
+                bottom: 2px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .max-w-5xl.rounded-xl {
+                border-radius: 0.5rem;
+            }
+
+            section h2::after {
+                width: 50px;
+                height: 2px;
+            }
+        }
+
+        /* 스크롤바 스타일 (Webkit) */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--slate-100);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--indigo-200);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--indigo-600);
+        }
+
+        /* Chart.js container styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Sticky Navigation -->
+    <nav class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="#home" class="text-xl font-bold text-indigo-600">Scene#Maker</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#about" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">About Me</a>
+                        <a href="#skills" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Skills</a>
+                        <a href="#project" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Project</a>
+                        <a href="#contact" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="home" class="relative w-full min-h-screen flex items-center justify-center bg-white overflow-hidden">
+        <div class="absolute inset-0 -z-10 bg-[radial-gradient(40%_50%_at_50%_50%,#c7d2fe_0%,#f8fafc_100%)]"></div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl md:text-7xl font-bold text-slate-800 tracking-tight">
+                임성환
+            </h1>
+            <p class="mt-6 text-xl md:text-2xl font-medium text-slate-600 max-w-2xl mx-auto">
+                복잡한 아이디어를 직관적이고 아름다운 사용자 경험으로 구현하는 프론트엔드 개발자입니다.
+            </p>
+            <div class="mt-10 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="mailto:epaktldk0203@gmail.com" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg transform transition-transform hover:scale-105">
+                    Email Me
+                </a>
+                <a href="https://github.com/limtjdghks" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-8 py-3 border border-slate-300 text-base font-medium rounded-lg text-indigo-600 bg-white hover:bg-slate-100 shadow-lg transform transition-transform hover:scale-105">
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- About Me Section -->
+    <section id="about" class="py-24 bg-gradient-to-b from-slate-50 to-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center justify-center gap-3 mb-4">
+                    <span class="text-4xl">👨‍💻</span>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">About Me</h2>
+                </div>
+                <p class="mt-4 text-lg text-slate-600">사용자가 기술의 복잡성을 느끼지 않고 서비스의 가치에만 집중할 수 있도록 만드는 인터페이스에 매력을 느낍니다.</p>
+            </div>
+            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="about-card bg-gradient-to-br from-indigo-50 to-blue-50 p-8 rounded-2xl shadow-lg border border-indigo-100">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-3xl">💡</span>
+                        <h3 class="text-xl font-bold text-slate-800">개발 철학</h3>
+                    </div>
+                    <p class="text-slate-700 leading-relaxed">
+                        저는 React와 TypeScript를 기반으로 견고하고 확장 가능한 컴포넌트를 설계하는 것을 선호하며, 특히 Tailwind CSS를 활용해 신속하게 반응형 디자인을 구현하는 것에 강점이 있습니다. 단순히 기능을 구현하는 것을 넘어, <strong>'왜' 이 기능이 필요한지</strong> 비즈니스 문제를 함께 고민하고 기술로 해결하는 과정 자체를 즐깁니다.
+                    </p>
+                </div>
+                <div class="about-card bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-2xl shadow-lg border border-purple-100">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-3xl">🚀</span>
+                        <h3 class="text-xl font-bold text-slate-800">프로젝트 경험</h3>
+                    </div>
+                    <p class="text-slate-700 leading-relaxed">
+                        이번 'Scene#Maker' 프로젝트는 저의 이러한 개발 철학이 집약된 결과물입니다. 생성형 AI라는 강력하지만 복잡한 기술을 <strong>'어떻게 하면 창작자들이 가장 쉽고 즐겁게 사용할 수 있을까?'</strong>라는 고민에서 시작했습니다. 기술을 위한 기술이 아닌, 사용자의 'Pain Point'를 해결하고 창의성을 극대화하는 도구를 만드는 과정을 통해 한 단계 더 성장할 수 있었습니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="py-24 bg-slate-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center justify-center gap-3 mb-4">
+                    <span class="text-4xl">🛠️</span>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Skills</h2>
+                </div>
+                <p class="mt-4 text-lg text-slate-600">제가 다루는 기술 스택입니다.</p>
+            </div>
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4">Frontend</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="skill-tag">React</span>
+                        <span class="skill-tag">TypeScript</span>
+                        <span class="skill-tag">JavaScript</span>
+                        <span class="skill-tag">Tailwind CSS</span>
+                        <span class="skill-tag">React Query</span>
+                        <span class="skill-tag">Vite</span>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4">Backend & Tools</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="skill-tag">Node.js</span>
+                        <span class="skill-tag">Express</span>
+                        <span class="skill-tag">Git</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Section -->
+    <section id="project" class="py-24 bg-gradient-to-b from-white to-slate-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center justify-center gap-3 mb-4">
+                    <span class="text-4xl">🎬</span>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Project: Scene#Maker</h2>
+                </div>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">스크립트만 입력하면 누구나 즉시 전문적인 영상 스토리보드를 생성할 수 있는 AI 기반 웹 애플리케이션</p>
+                <div class="mt-8 flex flex-wrap justify-center gap-4">
+                    <a href="https://github.com/limtjdghks/scene-maker" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 shadow-md hover:shadow-lg transition-all">
+                        <span>📦</span>
+                        GitHub Repository
+                    </a>
+                    <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-indigo-600 rounded-lg font-medium border-2 border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50 shadow-md hover:shadow-lg transition-all">
+                        <span>🚀</span>
+                        데모 링크
+                    </a>
+                </div>
+            </div>
+
+            <div class="max-w-6xl mx-auto space-y-8">
+                <!-- 문제 정의 카드 -->
+                <div class="project-card bg-gradient-to-br from-red-50 to-orange-50 border-l-4 border-red-400">
+                    <div class="project-card-header">
+                        <span class="project-icon">🎯</span>
+                        <h3 class="project-title">문제 정의</h3>
+                    </div>
+                    <div class="project-card-content">
+                        <p class="mb-4">영상 크리에이터들은 머릿속의 아이디어를 시각적인 스토리보드로 구현하는 데 높은 장벽을 겪습니다. 전문적인 그림 실력이 없으면 기획 단계에서 막히기 쉽고, 글로만 작성된 스크립트는 팀원 간의 비효율적인 소통을 유발하여 제작 비용과 시간을 증가시킵니다.</p>
+                        <div class="highlight-box bg-white/60">
+                            <p class="mb-0"><strong>해결 방안:</strong> 스크립트 입력만으로 즉시 전문적인 스토리보드를 생성해주는 AI 웹 애플리케이션을 기획하고 개발했습니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 아키텍처 및 설계 카드 -->
+                <div class="project-card bg-gradient-to-br from-blue-50 to-indigo-50 border-l-4 border-blue-400">
+                    <div class="project-card-header">
+                        <span class="project-icon">🏗️</span>
+                        <h3 class="project-title">아키텍처 및 설계</h3>
+                    </div>
+                    <div class="project-card-content">
+                        <div class="architecture-flow">
+                            <div class="flow-item">
+                                <div class="flow-badge bg-blue-100 text-blue-700">Frontend</div>
+                                <p class="flow-text">React(Vite) 기반 SPA</p>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-item">
+                                <div class="flow-badge bg-indigo-100 text-indigo-700">Backend</div>
+                                <p class="flow-text">Node.js(Express) API 서버</p>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-item">
+                                <div class="flow-badge bg-purple-100 text-purple-700">AI Pipeline</div>
+                                <p class="flow-text">LLM API + Image API</p>
+                            </div>
+                        </div>
+                        <p class="mt-6">프론트엔드는 유저의 스크립트 입력을 받아 백엔드에 전송하고, 백엔드는 이를 <strong>LLM API(프롬프트 변환)</strong>와 <strong>Image API(이미지 생성)</strong>에 순차적으로 요청(멀티모달 파이프라인)한 뒤, 최종 결과(이미지 URL)를 프론트엔드에 반환하는 구조입니다.</p>
+                    </div>
+                </div>
+
+                <!-- 핵심 기능 카드 -->
+                <div class="project-card bg-gradient-to-br from-green-50 to-emerald-50 border-l-4 border-green-400">
+                    <div class="project-card-header">
+                        <span class="project-icon">⚡</span>
+                        <h3 class="project-title">핵심 기능</h3>
+                    </div>
+                    <div class="project-card-content space-y-6">
+                        <!-- 기능 1 -->
+                        <div class="feature-card bg-white/70">
+                            <div class="feature-number">01</div>
+                            <div class="feature-content">
+                                <h4 class="feature-title">비동기 AI 연동 및 상태 관리</h4>
+                                <p class="feature-description">AI 이미지 생성은 최대 10초 이상 소요될 수 있는 대표적인 비동기 작업입니다. <strong>React Query (`useMutation`)</strong>를 도입하여 이 복잡한 비동기 통신 과정을 선언적으로 관리했습니다. 이를 통해 사용자는 `생성 중...`과 같은 명확한 로딩 상태를 볼 수 있으며, 개발자는 에러 핸들링과 캐시 관리 로직을 비즈니스 로직과 분리하여 코드의 가독성과 유지보수성을 획기적으로 향상시켰습니다.</p>
+                                <pre class="mt-4 p-4 bg-slate-800 text-white rounded-lg overflow-x-auto text-sm"><code>// React Query를 사용한 AI 생성 요청 예시
+const { mutate, data, isLoading, isError } = useMutation(
+  (script: string) => generateStoryboard(script),
+  {
+    onSuccess: (result) => {
+      // 성공 시 결과 상태 업데이트
+      setStoryboards(result.scenes);
+    },
+    onError: (error) => {
+      // 에러 핸들링
+      console.error(error);
+    },
+  }
+);
+</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- 기능 2 -->
+                        <div class="feature-card bg-white/70">
+                            <div class="feature-number">02</div>
+                            <div class="feature-content">
+                                <h4 class="feature-title">동적/반응형 UI 구현 (스크립트-이미지 맵핑)</h4>
+                                <p class="feature-description">사용자가 입력한 여러 줄의 스크립트(`#1...`, `#2...`)와 AI가 생성한 여러 장의 이미지를 1:1로 매칭하여 동적으로 렌더링했습니다. <strong>Tailwind CSS의 Grid 및 Flex</strong>를 활용하여 데스크톱에서는 2단 레이아웃(좌: 스크립트 편집기, 우: 갤러리)을, 모바일에서는 1단 레이아웃(상: 스크립트, 하: 이미지)으로 자동 변경되는 <strong>완전 반응형 UI</strong>를 구현했습니다.</p>
+                            </div>
+                        </div>
+
+                        <!-- 기능 3 -->
+                        <div class="feature-card bg-white/70">
+                            <div class="feature-number">03</div>
+                            <div class="feature-content">
+                                <h4 class="feature-title">스타일 프리셋 및 이미지 재생성 기능</h4>
+                                <p class="feature-description">사용자가 '시네마틱', '애니메이션', '스케치' 등 원하는 스타일을 선택하면, 이 값을 API 요청 시 함께 전송하여 결과물의 화풍을 제어하도록 구현했습니다. 또한, 각 장면 카드에 '재생성' 버튼을 추가하여, `useMutation`을 재호출함으로써 마음에 들지 않는 특정 이미지만을 간편하게 다시 생성할 수 있는 직관적인 UX를 제공했습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 나의 역할 및 기여 카드 -->
+                <div class="project-card bg-gradient-to-br from-purple-50 to-pink-50 border-l-4 border-purple-400">
+                    <div class="project-card-header">
+                        <span class="project-icon">👨‍💻</span>
+                        <h3 class="project-title">나의 역할 및 기여 (Solo Project)</h3>
+                    </div>
+                    <div class="project-card-content">
+                        <div class="role-grid">
+                            <div class="role-item">
+                                <span class="role-icon">⚛️</span>
+                                <div>
+                                    <strong>프론트엔드 100% 담당</strong>
+                                    <p>React, TypeScript 기반 프로젝트 전체 아키텍처 설계 및 구현</p>
+                                </div>
+                            </div>
+                            <div class="role-item">
+                                <span class="role-icon">🔧</span>
+                                <div>
+                                    <strong>백엔드 API 개발</strong>
+                                    <p>Node.js/Express 엔드포인트 설계 및 개발</p>
+                                </div>
+                            </div>
+                            <div class="role-item">
+                                <span class="role-icon">🔄</span>
+                                <div>
+                                    <strong>상태 관리</strong>
+                                    <p>React Query를 활용한 비동기 데이터 통신</p>
+                                </div>
+                            </div>
+                            <div class="role-item">
+                                <span class="role-icon">🎨</span>
+                                <div>
+                                    <strong>UI/UX 디자인</strong>
+                                    <p>Tailwind CSS를 이용한 반응형 디자인</p>
+                                </div>
+                            </div>
+                            <div class="role-item">
+                                <span class="role-icon">🤖</span>
+                                <div>
+                                    <strong>AI 파이프라인 설계</strong>
+                                    <p>멀티모달 프롬프트 파이프라인 설계</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 결과 및 성과 카드 -->
+                <div class="project-card bg-gradient-to-br from-yellow-50 to-amber-50 border-l-4 border-yellow-400">
+                    <div class="project-card-header">
+                        <span class="project-icon">📊</span>
+                        <h3 class="project-title">결과 및 성과</h3>
+                    </div>
+                    <div class="project-card-content">
+                        <div class="result-grid">
+                            <div class="result-item bg-white/70">
+                                <div class="result-icon">⏱️</div>
+                                <div class="result-text">
+                                    <strong>제작 시간 단축</strong>
+                                    <p>수 시간 → 3분 이내</p>
+                                </div>
+                            </div>
+                            <div class="result-item bg-white/70">
+                                <div class="result-icon">🎯</div>
+                                <div class="result-text">
+                                    <strong>직관적 UI/UX</strong>
+                                    <p>복잡한 AI API 추상화</p>
+                                </div>
+                            </div>
+                            <div class="result-item bg-white/70">
+                                <div class="result-icon">⚡</div>
+                                <div class="result-text">
+                                    <strong>빠른 개발 속도</strong>
+                                    <p>모던 프론트엔드 스택 활용</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 회고 카드 -->
+                <div class="project-card bg-gradient-to-br from-teal-50 to-cyan-50 border-l-4 border-teal-400">
+                    <div class="project-card-header">
+                        <span class="project-icon">💭</span>
+                        <h3 class="project-title">회고 (배운 점 및 개선점)</h3>
+                    </div>
+                    <div class="project-card-content space-y-6">
+                        <div class="retrospective-section bg-white/70">
+                            <h4 class="retrospective-title learn">✨ 배운 점</h4>
+                            <ul class="retrospective-list">
+                                <li>LLM과 이미지 생성 AI라는 이종의 API를 순차적으로 조합(파이프라인)하는 과정을 경험하며, 복잡한 비동기 로직을 선언적이고 안정적으로 처리하는 React Query의 강력함을 깊이 이해했습니다.</li>
+                                <li>사용자의 모호한 '의도'를 명확한 '결과물'로 변환하는 과정에서, 기술뿐만 아니라 UX 설계가 서비스의 핵심 가치를 어떻게 전달하는지 배울 수 있었습니다.</li>
+                            </ul>
+                        </div>
+                        <div class="retrospective-section bg-white/70">
+                            <h4 class="retrospective-title improve">🚀 개선점</h4>
+                            <ul class="retrospective-list">
+                                <li><strong>캐릭터 일관성:</strong> 현재는 생성된 장면 간의 캐릭터 일관성이 부족합니다. 향후 ControlNet이나 LoRA 같은 고급 기술을 백엔드에 적용하여, 동일한 캐릭터가 여러 장면에 일관되게 등장하도록 고도화하고 싶습니다.</li>
+                                <li><strong>실시간 스트리밍:</strong> 단순 API 호출을 넘어, WebSocket을 도입하여 AI의 이미지 생성 과정을 사용자에게 실시간 스트리밍(예: 흐릿한 이미지에서 점점 선명해지는 과정)으로 보여주어 '기다리는 경험'을 개선하고 싶습니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-slate-800 text-slate-300 py-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold text-white">Contact Me</h2>
+            <p class="mt-4 text-lg text-slate-400">아이디어를 현실로 만들 준비가 되셨나요?</p>
+            <div class="mt-8">
+                <a href="mailto:epaktldk0203@gmail.com" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-indigo-600 bg-white hover:bg-slate-100 shadow-lg transform transition-transform hover:scale-105">
+                    epaktldk0203@gmail.com
+                </a>
+            </div>
+            <div class="mt-12 text-sm text-slate-500">
+                &copy; 2025 임성환. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom CSS for Skill Tags -->
+    <style>
+        .skill-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--indigo-50) 0%, var(--indigo-100) 100%);
+            color: var(--indigo-700);
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid rgba(79, 70, 229, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        .skill-tag::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(79, 70, 229, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+        }
+
+        .skill-tag:hover {
+            background: linear-gradient(135deg, var(--indigo-200) 0%, var(--indigo-100) 100%);
+            color: var(--indigo-700);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 12px -2px rgba(79, 70, 229, 0.2),
+                        0 4px 6px -2px rgba(79, 70, 229, 0.1);
+            border-color: rgba(79, 70, 229, 0.3);
+        }
+
+        .skill-tag:hover::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        .skill-tag:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        /* 강조 텍스트 개선 */
+        strong {
+            color: var(--indigo-700);
+            font-weight: 600;
+            position: relative;
+        }
+
+        /* 섹션 간격 개선 */
+        section > div {
+            position: relative;
+        }
+
+        /* 프로젝트 탭 네비게이션 개선 */
+        nav[aria-label="Tabs"] {
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), transparent);
+        }
+
+        /* 탭 콘텐츠 페이드 애니메이션 - active일 때만 적용 */
+        .tab-content.active {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+
+        /* 헤더 로고 개선 */
+        body > nav a[href="#home"] {
+            background: linear-gradient(135deg, var(--indigo-600), var(--indigo-700));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        body > nav a[href="#home"]:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        /* 프로젝트 카드 스타일 */
+        .project-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            opacity: 0.3;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .project-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .project-icon {
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--slate-800);
+            margin: 0;
+        }
+
+        .project-card-content {
+            color: var(--slate-700);
+            line-height: 1.8;
+        }
+
+        .highlight-box {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--indigo-600);
+            margin-top: 1rem;
+        }
+
+        /* 아키텍처 플로우 스타일 */
+        .architecture-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .flow-item {
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .flow-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .flow-text {
+            font-size: 0.875rem;
+            color: var(--slate-600);
+            margin: 0;
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--indigo-600);
+            font-weight: bold;
+        }
+
+        /* 기능 카드 스타일 */
+        .feature-card {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--indigo-600);
+            line-height: 1;
+            flex-shrink: 0;
+            opacity: 0.3;
+        }
+
+        .feature-content {
+            flex: 1;
+        }
+
+        .feature-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--indigo-600);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            color: var(--slate-700);
+            line-height: 1.8;
+            margin: 0;
+        }
+
+        /* 역할 그리드 스타일 */
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .role-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .role-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-color: var(--indigo-300);
+        }
+
+        .role-icon {
+            font-size: 2rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .role-item strong {
+            display: block;
+            color: var(--slate-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .role-item p {
+            font-size: 0.875rem;
+            color: var(--slate-600);
+            margin: 0;
+        }
+
+        /* 결과 그리드 스타일 */
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .result-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 2rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-icon {
+            font-size: 3rem;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .result-text {
+            flex: 1;
+        }
+
+        .result-text strong {
+            display: block;
+            color: var(--slate-800);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .result-text p {
+            font-size: 0.875rem;
+            color: var(--slate-600);
+            margin: 0;
+        }
+
+        /* 회고 섹션 스타일 */
+        .retrospective-section {
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .retrospective-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .retrospective-title.learn {
+            color: var(--green-600);
+        }
+
+        .retrospective-title.improve {
+            color: var(--blue-600);
+        }
+
+        .retrospective-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .retrospective-list li {
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--slate-700);
+            line-height: 1.8;
+        }
+
+        .retrospective-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--indigo-600);
+            font-weight: bold;
+            font-size: 1.5rem;
+            line-height: 1.2;
+        }
+
+        /* About Me 카드 스타일 */
+        .about-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .about-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .about-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Skills 섹션 개선 */
+        #skills {
+            background: linear-gradient(to bottom, var(--slate-50), white);
+        }
+
+        #skills h3 {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+
+        #skills h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--indigo-600), transparent);
+            border-radius: 1px;
+        }
+
+        /* 반응형 개선 */
+        @media (max-width: 768px) {
+            .project-card {
+                padding: 1.5rem;
+            }
+
+            .architecture-flow {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+
+            .feature-card {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .feature-number {
+                font-size: 1.5rem;
+            }
+
+            .role-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .about-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+
+    <!-- JavaScript for Interactions -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Smooth scrolling for nav links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    // Check if it's just a placeholder link
+                    if (this.getAttribute('href') === '#') {
+                        e.preventDefault();
+                        return;
+                    }
+
+                    // Check if it's a nav link
+                    if (this.pathname === window.location.pathname) {
+                        const targetId = this.getAttribute('href');
+                        const targetElement = document.querySelector(targetId);
+
+                        if (targetElement) {
+                            e.preventDefault();
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
